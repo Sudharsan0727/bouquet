@@ -165,9 +165,9 @@ export default function Header({ isScrolled, activePage }) {
               </svg>
             </button>
 
-            <Link to="/account" className="hidden sm:flex flex-col items-start leading-none group cursor-pointer">
-              <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1">Hello, Sign In</span>
-              <span className="text-sm font-bold group-hover:text-brand-primary transition-colors">My Account</span>
+            <Link to="/account" className="hidden sm:flex flex-col items-start leading-none group cursor-pointer transition-transform hover:-translate-y-0.5 duration-300">
+              <span className="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em] mb-1">Hello, Sign In</span>
+              <span className={`text-sm font-black transition-colors duration-300 ${activePage === 'account' ? 'text-brand-primary' : 'text-slate-900 group-hover:text-brand-primary'}`}>My Account</span>
             </Link>
 
             <div className="flex gap-4 items-center border-l-2 border-slate-100 pl-4 md:pl-8">

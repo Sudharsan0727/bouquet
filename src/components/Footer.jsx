@@ -28,10 +28,12 @@ export default function Footer() {
     {
       title: "The Collective",
       links: [
-        { label: "Easter '25", to: "/easter" },
-        { label: "The Rose Room", to: "/roses" },
-        { label: "Birthday Edits", to: "/birthday" },
-        { label: "Seasonal Gallery", to: "#" }
+        { label: "Easter", to: "/easter" },
+        { label: "Roses", to: "/roses" },
+        { label: "Birthday", to: "/birthday" },
+        { label: "Sympathy", to: "#" },
+        { label: "Occasions", to: "#" },
+        { label: "Holidays", to: "#" }
       ]
     }
   ];

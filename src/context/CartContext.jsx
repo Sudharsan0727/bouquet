@@ -29,31 +29,42 @@ export function CartProvider({ children }) {
   };
 
   // Cart operations
-  const addToCart = (product) => {
+  const addToCart = (product, options = {}) => {
     setCartItems(prev => {
-      const existing = prev.find(item => item.id === product.id);
+      const existing = prev.find(item => 
+        item.id === product.id && 
+        JSON.stringify(item.options) === JSON.stringify(options)
+      );
       if (existing) {
         return prev.map(item => 
-          item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
+          (item.id === product.id && JSON.stringify(item.options) === JSON.stringify(options))
+            ? { ...item, quantity: item.quantity + 1 } : item
         );
       }
-      return [...prev, { ...product, quantity: 1 }];
+      // Use timestamp-based cartKey for items with different options
+      const cartKey = `${product.id}-${Date.now()}`;
+      return [...prev, { ...product, options, quantity: 1, cartKey }];
     });
-    // Optional: automatically open sidebar when added
     openSidebar('cart');
   };
 
-  const removeFromCart = (productId) => {
-    setCartItems(prev => prev.filter(item => item.id !== productId));
+  const removeFromCart = (cartKey) => {
+    setCartItems(prev => prev.filter(item => item.cartKey !== cartKey && item.id !== cartKey));
   };
 
-  const updateCartQuantity = (productId, newQuantity) => {
+  const updateCartQuantity = (cartKey, newQuantity) => {
     if (newQuantity < 1) {
-      removeFromCart(productId);
+      removeFromCart(cartKey);
       return;
     }
     setCartItems(prev => 
-      prev.map(item => item.id === productId ? { ...item, quantity: newQuantity } : item)
+      prev.map(item => (item.cartKey === cartKey || item.id === cartKey) ? { ...item, quantity: newQuantity } : item)
+    );
+  };
+
+  const updateCartItemOptions = (cartKey, newOptions) => {
+    setCartItems(prev => 
+      prev.map(item => (item.cartKey === cartKey || item.id === cartKey) ? { ...item, options: newOptions } : item)
     );
   };
 
@@ -85,6 +96,7 @@ export function CartProvider({ children }) {
       addToCart,
       removeFromCart,
       updateCartQuantity,
+      updateCartItemOptions,
       toggleWishlist,
       removeFromWishlist,
       sidebarOpen,

@@ -7,29 +7,24 @@ const CORE_PRODUCTS = ALL_PRODUCTS;
 
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import CartSidebar from '../components/CartSidebar';
 
 
 export default function ProductDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { 
-    cartItems, 
-    wishlistItems, 
     addToCart, 
     toggleWishlist, 
-    sidebarOpen, 
-    sidebarTab, 
-    openSidebar, 
-    closeSidebar, 
-    setSidebarTab, 
-    removeFromCart, 
-    removeFromWishlist,
-    updateCartQuantity 
+    wishlistItems,
+    openSidebar
   } = useCart();
   const [activeTab, setActiveTab] = useState('description');
   const [quantity, setQuantity] = useState(1);
   const [isScrolled, setIsScrolled] = useState(false);
   const [selectedImage, setSelectedImage] = useState('');
+  const [chocolates, setChocolates] = useState('Select Option');
+  const [stuffedAnimal, setStuffedAnimal] = useState('Select Option');
 
   const product = CORE_PRODUCTS.find(p => p.id.toString() === id) || CORE_PRODUCTS[0];
   const isInWishlist = wishlistItems.some(item => item.id === product.id);
@@ -47,8 +42,12 @@ export default function ProductDetails() {
   }, [product]);
 
   const handleAddToCart = () => {
+    const options = {};
+    if (chocolates !== 'Select Option') options.chocolates = chocolates;
+    if (stuffedAnimal !== 'Select Option') options.stuffedAnimal = stuffedAnimal;
+
     for (let i = 0; i < quantity; i++) {
-        addToCart(product);
+        addToCart(product, options);
     }
     setQuantity(1);
     openSidebar('cart');
@@ -134,7 +133,7 @@ export default function ProductDetails() {
 
             <div className="space-y-4">
                <p className="text-sm text-slate-700 italic border-l-4 border-slate-100 pl-4">{product.category} Selection</p>
-               <div className="space-y-2 text-sm">
+               <div className="space-y-2 text-sm border-b border-slate-100 pb-8">
                   <p className="font-bold">About this item:</p>
                   <ul className="list-disc list-inside space-y-2 text-slate-600 font-light leading-relaxed">
                      <li>Hand-curated floral arrangement from our London studio.</li>
@@ -142,6 +141,62 @@ export default function ProductDetails() {
                      <li>Includes premium plant food and care instructions.</li>
                      <li>Sourced directly from sustainable local flower farms.</li>
                   </ul>
+               </div>
+
+               {/* Add A Little Something Extra */}
+               <div className="pt-8 space-y-6">
+                  <h3 className="text-sm font-bold text-slate-900 tracking-tight flex items-center gap-2">
+                    <span className="w-1 h-4 bg-brand-primary rounded-full"></span>
+                    Add A Little Something Extra
+                  </h3>
+                  
+                  <div className="grid grid-cols-1 gap-3">
+                    {/* Chocolates */}
+                    <div className="flex items-center gap-4 p-4 rounded-2xl bg-slate-50 border border-slate-100 group hover:bg-white hover:shadow-xl hover:shadow-brand-primary/5 transition-all duration-300">
+                      <div className="w-14 h-14 bg-white rounded-xl flex items-center justify-center text-brand-primary shadow-sm group-hover:bg-brand-primary group-hover:text-white transition-all duration-300 shrink-0">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v20"/><path d="M22 12H2"/><path d="m18 6-6 6-6-6"/><path d="m18 18-6-6-6 6"/></svg>
+                      </div>
+                      <div className="flex-grow space-y-1.5">
+                        <p className="text-[11px] font-black uppercase tracking-wider text-slate-400">Sweetness</p>
+                        <div className="flex flex-col gap-1">
+                          <label className="text-sm font-serif text-slate-800">Artisanal Chocolates</label>
+                          <select 
+                            value={chocolates}
+                            onChange={(e) => setChocolates(e.target.value)}
+                            className="w-full bg-white/50 border border-slate-200 rounded-lg px-3 py-1.5 text-[12px] focus:border-brand-primary transition-all outline-none appearance-none cursor-pointer"
+                          >
+                            <option>Select Option</option>
+                            <option>Milk Chocolate Box (+$12.00)</option>
+                            <option>Dark Chocolate Truffles (+$18.00)</option>
+                            <option>Assorted Belgian (+$25.00)</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Stuffed Animal */}
+                    <div className="flex items-center gap-4 p-4 rounded-2xl bg-slate-50 border border-slate-100 group hover:bg-white hover:shadow-xl hover:shadow-brand-primary/5 transition-all duration-300">
+                      <div className="w-14 h-14 bg-white rounded-xl flex items-center justify-center text-brand-primary shadow-sm group-hover:bg-brand-primary group-hover:text-white transition-all duration-300 shrink-0">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 10a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z"/><path d="M10 22a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/><path d="M14 22a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/><path d="M12 10c-3 0-5 2-5 5v3c0 1 1 2 2 2h6c1 0 2-1 2-2v-3c0-3-2-5-5-5Z"/></svg>
+                      </div>
+                      <div className="flex-grow space-y-1.5">
+                        <p className="text-[11px] font-black uppercase tracking-wider text-slate-400">Companion</p>
+                        <div className="flex flex-col gap-1">
+                          <label className="text-sm font-serif text-slate-800">Stuffed Animal</label>
+                          <select 
+                            value={stuffedAnimal}
+                            onChange={(e) => setStuffedAnimal(e.target.value)}
+                            className="w-full bg-white/50 border border-slate-200 rounded-lg px-3 py-1.5 text-[12px] focus:border-brand-primary transition-all outline-none appearance-none cursor-pointer"
+                          >
+                            <option>Select Option</option>
+                            <option>Classic Teddy Bear (+$15.00)</option>
+                            <option>Bunny Plush (+$12.00)</option>
+                            <option>Luxury Weighted Bear (+$35.00)</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                </div>
             </div>
           </div>
@@ -208,21 +263,21 @@ export default function ProductDetails() {
       </section>
 
       {/* ── Additional Sections (Related, Tabs) ── */}
-      <section className="bg-slate-50 py-16 mt-16">
+      <section className="bg-slate-50 py-10 mt-10">
         <div className="container mx-auto px-6">
-           <div className="flex border-b border-slate-200 mb-8 sticky top-20 bg-slate-50 z-20">
+           <div className="flex border-b border-slate-200 mb-6 sticky top-20 bg-slate-50 z-20">
               {['Description', 'Information', 'Reviews'].map(tab => (
                  <button 
                   key={tab} 
                   onClick={() => setActiveTab(tab.toLowerCase())}
-                  className={`px-8 py-4 text-sm font-medium border-b-2 transition-all ${activeTab === tab.toLowerCase() ? 'border-brand-primary text-brand-primary' : 'border-transparent text-slate-400 hover:text-slate-600'}`}
+                  className={`px-8 py-3 text-sm font-bold border-b-2 transition-all uppercase tracking-widest ${activeTab === tab.toLowerCase() ? 'border-brand-primary text-brand-primary' : 'border-transparent text-slate-400 hover:text-slate-600'}`}
                  >
                    {tab}
                  </button>
               ))}
            </div>
 
-           <div className="max-w-4xl min-h-[400px]">
+           <div className="max-w-4xl min-h-[150px]">
               {activeTab === 'description' && (
                  <div className="space-y-6 animate-fadeIn">
                     <h3 className="text-xl font-bold text-slate-900">Product Description</h3>
@@ -277,121 +332,7 @@ export default function ProductDetails() {
       </section>
 
       <Footer />
-
-      {/* ── Cart/Wishlist Sidebar ── */}
-      <div className={`fixed inset-0 z-[100] bg-slate-900/40 backdrop-blur-sm transition-opacity duration-500 ${sidebarOpen ? 'opacity-100 visible' : 'opacity-0 invisible'}`} onClick={closeSidebar}>
-        <div className={`absolute top-0 right-0 h-full w-full max-w-sm bg-white shadow-2xl transition-transform duration-500 flex flex-col ${sidebarOpen ? 'translate-x-0' : 'translate-x-full'}`} onClick={e => e.stopPropagation()}>
-          <div className="flex items-center justify-between p-6 border-b border-slate-100 shrink-0">
-             <div className="flex gap-6">
-                <button onClick={() => setSidebarTab('cart')} className={`text-lg font-serif pb-1 ${sidebarTab === 'cart' ? 'text-brand-primary border-b-2 border-brand-primary font-bold' : 'text-slate-400'}`}>Cart ({cartItems.length})</button>
-                <button onClick={() => setSidebarTab('wishlist')} className={`text-lg font-serif pb-1 ${sidebarTab === 'wishlist' ? 'text-brand-primary border-b-2 border-brand-primary font-bold' : 'text-slate-400'}`}>Wishlist ({wishlistItems.length})</button>
-             </div>
-             <button onClick={closeSidebar} className="p-2 text-slate-400 hover:text-brand-primary transition-all"><svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg></button>
-          </div>
-          <div className="flex-grow overflow-y-auto p-8 border-b border-slate-50">
-             {sidebarTab === 'cart' ? (
-                cartItems.length > 0 ? (
-                   <div className="space-y-8">
-                      {cartItems.map(item => (
-                         <div key={item.id} className="flex gap-6 border-b border-slate-50 pb-8 last:border-0 group/item">
-                            <div className="w-24 aspect-[4/5] overflow-hidden rounded-2xl bg-slate-100 shrink-0 shadow-sm transition-transform group-hover/item:scale-105">
-                               <img src={item.image} className="w-full h-full object-cover" />
-                            </div>
-                            <div className="flex-grow flex flex-col justify-between py-1">
-                               <div>
-                                  <div className="flex justify-between items-start mb-1">
-                                     <p className="font-serif text-slate-900 text-lg leading-tight line-clamp-2">{item.name}</p>
-                                     <button 
-                                        onClick={() => removeFromCart(item.id)} 
-                                        className="text-slate-300 hover:text-rose-500 transition-colors p-1"
-                                     >
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                        </svg>
-                                     </button>
-                                  </div>
-                                  <p className="text-brand-accent font-black text-sm">{item.price}</p>
-                               </div>
-                               
-                               <div className="flex items-center justify-between">
-                                  <div className="flex items-center bg-slate-50 border border-slate-100 rounded-xl p-1">
-                                     <button 
-                                        onClick={() => updateCartQuantity(item.id, item.quantity - 1)}
-                                        className="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-brand-primary hover:bg-white rounded-lg transition-all"
-                                     >
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M20 12H4" />
-                                        </svg>
-                                     </button>
-                                     <span className="w-8 text-center text-xs font-black text-slate-700">{item.quantity}</span>
-                                     <button 
-                                        onClick={() => updateCartQuantity(item.id, item.quantity + 1)}
-                                        className="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-brand-primary hover:bg-white rounded-lg transition-all"
-                                     >
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 4v16m8-8H4" />
-                                        </svg>
-                                     </button>
-                                  </div>
-                                  <span className="text-xs font-bold text-slate-400">
-                                     Subtotal: <span className="text-slate-900">${(parseFloat(item.price.replace('$', '')) * item.quantity).toFixed(2)}</span>
-                                  </span>
-                               </div>
-                            </div>
-                         </div>
-                      ))}
-                   </div>
-                ) : <div className="text-center pt-20"><p className="font-serif text-slate-300 text-2xl italic">The vault is currently empty.</p></div>
-             ) : (
-                wishlistItems.length > 0 ? (
-                   <div className="space-y-8">
-                      {wishlistItems.map(item => (
-                        <div key={item.id} className="flex gap-6 border-b border-slate-50 pb-8">
-                           <div className="w-20 aspect-[4/5] overflow-hidden rounded-xl bg-slate-100 shrink-0">
-                              <img src={item.image} className="w-full h-full object-cover" />
-                           </div>
-                            <div className="flex-grow">
-                               <p className="font-serif text-slate-900 text-lg mb-4">{item.name}</p>
-                               <div className="flex gap-2">
-                                  <button onClick={() => { addToCart(item); removeFromWishlist(item.id); }} className="text-[10px] font-black uppercase text-brand-primary tracking-[0.2em] bg-brand-primary/5 px-3 py-1 rounded-full">To Cart</button>
-                                  <button onClick={() => removeFromWishlist(item.id)} className="text-[10px] font-black uppercase text-slate-400 tracking-[0.2em] bg-slate-50 px-3 py-1 rounded-full">Remove</button>
-                               </div>
-                            </div>
-                         </div>
-                      ))}
-                   </div>
-                ) : <div className="text-center pt-20"><p className="font-serif text-slate-300 text-2xl italic">No specimens saved yet.</p></div>
-             )}
-          </div>
-
-          {/* Fixed Footer for Cart Sidebar */}
-          {sidebarTab === 'cart' && cartItems.length > 0 && (
-             <div className="p-8 space-y-6 bg-white shrink-0">
-                <div className="flex justify-between font-serif text-xl">
-                   <span>Total</span>
-                   <span className="text-brand-primary font-bold">${cartItems.reduce((acc, item) => acc + parseInt(item.price.replace('$', '')) * item.quantity, 0).toFixed(2)}</span>
-                </div>
-                <div className="space-y-3">
-                   <Link 
-                      to="/checkout"
-                      onClick={closeSidebar}
-                      className="w-full bg-brand-primary text-white py-5 rounded-2xl font-black uppercase text-[10px] tracking-[0.3em] hover:bg-brand-accent transition-all shadow-2xl flex items-center justify-center text-center"
-                   >
-                      Proceed to Checkout
-                   </Link>
-                   <Link 
-                      to="/cart"
-                      onClick={closeSidebar}
-                      className="w-full py-2 text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 hover:text-brand-primary transition-colors text-center block"
-                   >
-                      View carts
-                   </Link>
-                </div>
-             </div>
-          )}
-        </div>
-      </div>
-
+      <CartSidebar />
     </div>
   );
 }

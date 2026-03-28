@@ -2,30 +2,88 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 
-import { BIRTHDAY_PRODUCTS } from '../data/products';
+import { ALL_PRODUCTS, EASTER_PRODUCTS, ROSES_PRODUCTS, BIRTHDAY_PRODUCTS } from '../data/products';
 
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import CartSidebar from '../components/CartSidebar';
 
 export default function Birthday() {
+  const [activeMainCollection, setActiveMainCollection] = useState('Birthday');
+  const [activeSubCategory, setActiveSubCategory] = useState(null);
+  const [expandedCollection, setExpandedCollection] = useState(null); // No variants to expand by default
+
+  const toggleExpand = (label) => {
+    setExpandedCollection(prev => prev === label ? null : label);
+  };
+
+  const getSourceProducts = () => {
+    switch(activeMainCollection) {
+      case 'All': return ALL_PRODUCTS;
+      case 'Easter': return EASTER_PRODUCTS;
+      case 'Roses': return ROSES_PRODUCTS;
+      case 'Birthday': return BIRTHDAY_PRODUCTS;
+      default: return BIRTHDAY_PRODUCTS;
+    }
+  };
+
+  const sourceProducts = getSourceProducts();
+  
+  // Calculate sub-category filtered items if a sub-category is selected
+  const subFilteredProducts = activeSubCategory 
+    ? sourceProducts.filter(p => p.category === activeSubCategory) 
+    : sourceProducts;
+
+  const maxVal = Math.max(...subFilteredProducts.map(p => parseInt(p.price.replace('$', '').split('.')[0]) || 0));
+  const collections = [
+    { label: 'All', count: ALL_PRODUCTS.length, link: '/' },
+    { 
+      label: 'Easter', 
+      count: EASTER_PRODUCTS.length, 
+      link: '/easter'
+    },
+    { 
+      label: 'Roses', 
+      count: ROSES_PRODUCTS.length, 
+      link: '/roses'
+    },
+    { 
+      label: 'Birthday', 
+      count: BIRTHDAY_PRODUCTS.length, 
+      link: '/birthday'
+    },
+    { 
+      label: 'Sympathy', 
+      count: 0, 
+      link: '#',
+      subCategories: ["Funeral Flowers", "Cremation and Memorial", "Casket Flowers", "Standing Sprays & Wreaths", "Sympathy Arrangements", "For The Home"]
+    },
+    { 
+      label: 'Occasions', 
+      count: 0, 
+      link: '#',
+      subCategories: ["Wedding Flowers", "Anniversary", "Birthday", "Get Well", "New Baby"]
+    },
+    { 
+      label: 'Holidays', 
+      count: 0, 
+      link: '#',
+      subCategories: ["Mother's Day", "Father's Day", "Christmas", "Valentine's Day"]
+    }
+  ];
   const [isScrolled, setIsScrolled] = useState(false);
   const { 
-    cartItems, 
-    wishlistItems, 
     addToCart, 
     toggleWishlist, 
-    sidebarOpen, 
-    sidebarTab, 
-    openSidebar, 
-    closeSidebar, 
-    setSidebarTab, 
-    removeFromCart, 
-    removeFromWishlist,
-    updateCartQuantity 
+    wishlistItems 
   } = useCart();
-  const [priceRange, setPriceRange] = useState(300);
-  const [activeCategory, setActiveCategory] = useState("All");
-  const [sortBy, setSortBy] = useState("default");
+  const [priceRange, setPriceRange] = useState(maxVal);
+  const [sortBy, setSortBy] = useState("price-low");
+
+  // Reset price range when selection changes to ensure all products are visible
+  useEffect(() => {
+    setPriceRange(maxVal);
+  }, [activeMainCollection, activeSubCategory, maxVal]);
 
 
   useEffect(() => {
@@ -36,27 +94,20 @@ export default function Birthday() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const filteredProducts = BIRTHDAY_PRODUCTS
+  const filteredProducts = subFilteredProducts
     .filter(p => {
       const cost = parseInt(p.price.replace('$', '').split('.')[0]);
       if (cost > priceRange) return false;
-      if (activeCategory !== "All" && p.category !== activeCategory) return false;
       return true;
     })
-    .sort((a,b) => {
-       if (sortBy === 'price-low') {
-         return parseInt(a.price.replace('$', '')) - parseInt(b.price.replace('$', ''));
-       }
-       if (sortBy === 'price-high') {
-         return parseInt(b.price.replace('$', '')) - parseInt(a.price.replace('$', ''));
-       }
-       if (sortBy === 'latest') {
-          return b.id - a.id;
-       }
-       if (sortBy === 'popularity') {
-          return (b.badge === 'Best Seller' ? 1 : 0) - (a.badge === 'Best Seller' ? 1 : 0);
-       }
-       return 0;
+    .sort((a, b) => {
+      if (sortBy === 'price-low') {
+        return parseInt(a.price.replace('$', '')) - parseInt(b.price.replace('$', ''));
+      }
+      if (sortBy === 'price-high') {
+        return parseInt(b.price.replace('$', '')) - parseInt(a.price.replace('$', ''));
+      }
+      return 0;
     });
 
 
@@ -65,18 +116,20 @@ export default function Birthday() {
       <Header isScrolled={isScrolled} activePage="birthday" />
 
       {/* ── Page Header ── */}
-      <section className="relative bg-violet-50 py-16 md:py-24 overflow-hidden flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%)' }}>
+      <section className="relative bg-amber-50 py-16 md:py-24 overflow-hidden flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%)' }}>
         <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
-          <div className="absolute top-[-20%] right-[-10%] w-[400px] h-[400px] bg-brand-accent/10 blur-[80px] rounded-full" />
+          <div className="absolute top-[-20%] right-[-10%] w-[400px] h-[400px] bg-amber-200/20 blur-[80px] rounded-full" />
           <div className="absolute bottom-[-20%] left-[-10%] w-[300px] h-[300px] bg-brand-primary/10 blur-[80px] rounded-full" />
         </div>
 
         <div className="relative z-10 text-center space-y-4 px-6">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-serif text-brand-primary leading-tight tracking-tight">
-            Birthday <span className="italic font-light text-brand-accent">Collection</span>
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-serif text-slate-900 leading-tight tracking-tight capitalize">
+            {activeMainCollection === 'All' ? 'Our Entire' : activeMainCollection.toLowerCase()} <span className="italic font-light text-brand-accent">Edits</span>
           </h1>
           <p className="text-slate-500 max-w-xl mx-auto font-light md:text-lg">
-            Make their special day unforgettable with our vibrant birthday bouquets, specially curated to deliver joy, smiles, and lasting memories.
+            {activeMainCollection === 'All' 
+              ? 'Browse our complete artisanal archive, featuring every hand-crafted arrangement across all our signature boutiques.'
+              : 'Birthdays are meant to be celebrated with joy and color. Send a vibrant bouquet to make their special day unforgettable.'}
           </p>
         </div>
       </section>
@@ -106,19 +159,75 @@ export default function Birthday() {
           <div className="space-y-4">
             <h3 className="text-lg font-serif text-slate-900 border-b border-slate-200 pb-2">Categories</h3>
             <ul className="space-y-3">
-              {["All", "Bright Bouquets", "Roses", "With Chocolates", "Premium"].map(category => (
-                <li key={category}>
-                  <button
-                    onClick={() => setActiveCategory(category)}
-                    className={`text-sm w-full text-left transition-colors flex items-center justify-between ${activeCategory === category ? 'text-brand-primary font-bold' : 'text-slate-500 hover:text-brand-primary'}`}
-                  >
-                    <span>{category}</span>
-                    {activeCategory === category && <span className="w-1.5 h-1.5 rounded-full bg-brand-accent"></span>}
-                  </button>
-                </li>
-              ))}
+              {collections.map(item => {
+                const isExpanded = expandedCollection === item.label;
+                const hasSub = item.subCategories && item.subCategories.length > 0;
+                
+                return (
+                  <li key={item.label} className="space-y-2">
+                    <div className="flex items-center justify-between group">
+                      <button
+                        onClick={() => {
+                          setActiveMainCollection(item.label);
+                          setActiveSubCategory(null);
+                          if (hasSub) toggleExpand(item.label);
+                        }}
+                        className={`text-sm flex-grow text-left transition-colors flex items-center justify-between py-1 ${activeMainCollection === item.label ? 'text-brand-primary font-bold' : 'text-slate-500 hover:text-brand-primary'}`}
+                      >
+                        <span className="flex items-center gap-2">
+                            {item.label}
+                            <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full transition-colors ${activeMainCollection === item.label ? 'bg-brand-primary/10 text-brand-primary' : 'bg-slate-50 text-slate-400 group-hover:bg-brand-primary/10 group-hover:text-brand-primary'}`}>
+                              {item.count}
+                            </span>
+                        </span>
+                        {activeMainCollection === item.label && <span className="w-1.5 h-1.5 rounded-full bg-brand-accent ml-2"></span>}
+                      </button>
+                      
+                      {hasSub && (
+                        <button 
+                          onClick={() => toggleExpand(item.label)}
+                          className={`p-1 text-slate-300 hover:text-brand-primary transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+                        >
+                          <svg width="10" height="6" viewBox="0 0 10 6" fill="none" className="stroke-current">
+                            <path d="M1 1L5 5L9 1" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                          </svg>
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Sub Categories Accordion */}
+                    {hasSub && isExpanded && (
+                      <ul className="pl-4 space-y-2 border-l border-slate-100 ml-1 pb-2">
+                        {item.subCategories.map(sub => {
+                          let subCount = 0;
+                          if (item.label === 'Easter') {
+                             subCount = EASTER_PRODUCTS.filter(p => p.category === sub || (sub === 'Easter Decor' && p.category === 'Easter')).length;
+                          } else if (item.label === 'Roses') {
+                             subCount = ROSES_PRODUCTS.filter(p => p.category === sub).length;
+                          } else if (item.label === 'Birthday') {
+                             subCount = BIRTHDAY_PRODUCTS.filter(p => p.category === sub).length;
+                          }
+                          
+                          return (
+                            <li key={sub}>
+                              <button 
+                                onClick={() => setActiveSubCategory(sub)}
+                                className={`text-[13px] w-full text-left flex items-center justify-between group-sub transition-colors ${activeSubCategory === sub ? 'text-brand-primary font-bold' : 'text-slate-400 hover:text-brand-primary'}`}
+                              >
+                                <span>{sub}</span>
+                                <span className="text-[8px] opacity-0 group-sub-hover:opacity-100 transition-opacity">({subCount})</span>
+                              </button>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    )}
+                  </li>
+                );
+              })}
             </ul>
           </div>
+
 
           {/* Price Range */}
           <div className="space-y-4">
@@ -127,7 +236,7 @@ export default function Birthday() {
               <input
                 type="range"
                 min="0"
-                max="300"
+                max={maxVal}
                 value={priceRange}
                 onChange={(e) => setPriceRange(Number(e.target.value))}
                 className="w-full accent-brand-primary"
@@ -148,15 +257,12 @@ export default function Birthday() {
 
           {/* Top Bar inside Grid */}
           <div className="flex justify-between items-center mb-8 pb-4 border-b border-slate-100">
-            <p className="text-sm text-slate-500">Showing 1–{filteredProducts.length} of {BIRTHDAY_PRODUCTS.length} results</p>
+            <p className="text-sm text-slate-500">Showing 1–{filteredProducts.length} of {sourceProducts.length} results</p>
             <select 
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
               className="bg-transparent border border-slate-200 text-sm py-2 px-4 rounded-lg focus:outline-none focus:border-brand-primary"
             >
-              <option value="default">Default sorting</option>
-              <option value="popularity">Sort by popularity</option>
-              <option value="latest">Sort by latest</option>
               <option value="price-low">Sort by price: low to high</option>
               <option value="price-high">Sort by price: high to low</option>
             </select>
@@ -166,7 +272,7 @@ export default function Birthday() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {filteredProducts.map((product) => (
               <div key={product.id} className="group flex flex-col">
-                <Link to={`/product/${product.id}`} className="relative aspect-[4/5] overflow-hidden rounded-2xl bg-slate-100 mb-4 cursor-pointer block">
+                <Link to={`/product/${product.id}`} className="relative aspect-[3/4] overflow-hidden rounded-2xl bg-slate-100 mb-4 cursor-pointer block">
                   {/* Image */}
                   <img
                     src={product.image}
@@ -176,10 +282,9 @@ export default function Birthday() {
 
                   {/* Badges */}
                   {product.badge && (
-                    <span className={`absolute top-4 left-4 text-[10px] uppercase tracking-widest font-bold px-3 py-1 rounded-full z-10 ${product.badge === 'Sale' ? 'bg-rose-500 text-white' :
-                        product.badge === 'Best Seller' ? 'bg-amber-600 text-white' :
-                          product.badge === 'Popular' ? 'bg-brand-accent text-white' :
-                            'bg-white text-slate-800'
+                    <span className={`absolute top-4 left-4 text-[10px] uppercase tracking-widest font-bold px-3 py-1 rounded-full z-10 ${product.badge === 'Sale' ? 'bg-amber-400 text-slate-900' :
+                        product.badge === 'Best Seller' ? 'bg-brand-primary text-white' :
+                          'bg-white text-slate-800'
                       }`}>
                       {product.badge}
                     </span>
@@ -210,7 +315,6 @@ export default function Birthday() {
 
                 {/* Details */}
                 <div className="text-center space-y-1">
-                  <p className="text-[10px] text-slate-400 uppercase tracking-widest">{product.category}</p>
                   <Link to={`/product/${product.id}`}>
                     <h3 className="font-serif text-lg text-slate-900 group-hover:text-brand-primary transition-colors cursor-pointer">
                       {product.name}
@@ -234,141 +338,9 @@ export default function Birthday() {
             </div>
           )}
         </div>
-
       </section>
 
-
-
-      {/* ── Slide-Over Sidebar (Cart & Wishlist) ── */}
-      <div className={`fixed inset-0 z-[100] bg-slate-900/40 backdrop-blur-sm transition-opacity duration-500 ${sidebarOpen ? 'opacity-100 visible' : 'opacity-0 invisible'}`} onClick={closeSidebar}>
-        <div className={`absolute top-0 right-0 h-full w-full max-w-sm bg-white shadow-2xl transition-transform duration-500 ease-[cubic-bezier(0.19,1,0.22,1)] flex flex-col ${sidebarOpen ? 'translate-x-0' : 'translate-x-full'}`} onClick={e => e.stopPropagation()}>
-
-          <div className="flex items-center justify-between p-6 border-b border-slate-100 shrink-0">
-            <div className="flex gap-6">
-              <button
-                onClick={() => setSidebarTab('cart')}
-                className={`text-lg font-serif transition-colors pb-1 ${sidebarTab === 'cart' ? 'text-brand-primary font-bold border-b-2 border-brand-primary' : 'text-slate-400 hover:text-slate-900'}`}
-              >
-                Cart ({cartItems.length})
-              </button>
-              <button
-                onClick={() => setSidebarTab('wishlist')}
-                className={`text-lg font-serif transition-colors pb-1 ${sidebarTab === 'wishlist' ? 'text-brand-primary font-bold border-b-2 border-brand-primary' : 'text-slate-400 hover:text-slate-900'}`}
-              >
-                Wishlist ({wishlistItems.length})
-              </button>
-            </div>
-            <button onClick={closeSidebar} className="p-2 text-slate-400 hover:text-brand-primary hover:bg-violet-50 rounded-full transition-all">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-
-          <div className="flex-grow overflow-y-auto p-8 border-b border-slate-50">
-             {sidebarTab === 'cart' ? (
-                cartItems.length > 0 ? (
-                   <div className="space-y-8">
-                      {cartItems.map(item => (
-                         <div key={item.id} className="flex gap-6 border-b border-slate-50 pb-8 last:border-0 group/item">
-                            <div className="w-24 aspect-[4/5] overflow-hidden rounded-2xl bg-slate-100 shrink-0 shadow-sm transition-transform group-hover/item:scale-105">
-                               <img src={item.image} className="w-full h-full object-cover" />
-                            </div>
-                            <div className="flex-grow flex flex-col justify-between py-1">
-                               <div>
-                                  <div className="flex justify-between items-start mb-1">
-                                     <p className="font-serif text-slate-900 text-lg leading-tight line-clamp-2">{item.name}</p>
-                                     <button 
-                                        onClick={() => removeFromCart(item.id)} 
-                                        className="text-slate-300 hover:text-rose-500 transition-colors p-1"
-                                     >
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                        </svg>
-                                     </button>
-                                  </div>
-                                  <p className="text-brand-accent font-black text-sm">{item.price}</p>
-                               </div>
-                               
-                               <div className="flex items-center justify-between">
-                                  <div className="flex items-center bg-slate-50 border border-slate-100 rounded-xl p-1">
-                                     <button 
-                                        onClick={() => updateCartQuantity(item.id, item.quantity - 1)}
-                                        className="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-brand-primary hover:bg-white rounded-lg transition-all"
-                                     >
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M20 12H4" />
-                                        </svg>
-                                     </button>
-                                     <span className="w-8 text-center text-xs font-black text-slate-700">{item.quantity}</span>
-                                     <button 
-                                        onClick={() => updateCartQuantity(item.id, item.quantity + 1)}
-                                        className="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-brand-primary hover:bg-white rounded-lg transition-all"
-                                     >
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 4v16m8-8H4" />
-                                        </svg>
-                                     </button>
-                                  </div>
-                                  <span className="text-xs font-bold text-slate-400">
-                                     Subtotal: <span className="text-slate-900">${(parseFloat(item.price.replace('$', '')) * item.quantity).toFixed(2)}</span>
-                                  </span>
-                               </div>
-                            </div>
-                         </div>
-                      ))}
-                   </div>
-                ) : <div className="text-center pt-20"><p className="font-serif text-slate-300 text-2xl italic">The vault is currently empty.</p></div>
-             ) : (
-                wishlistItems.length > 0 ? (
-                   <div className="space-y-8">
-                      {wishlistItems.map(item => (
-                        <div key={item.id} className="flex gap-6 border-b border-slate-50 pb-8">
-                           <div className="w-20 aspect-[4/5] overflow-hidden rounded-xl bg-slate-100 shrink-0">
-                              <img src={item.image} className="w-full h-full object-cover" />
-                           </div>
-                            <div className="flex-grow">
-                               <p className="font-serif text-slate-900 text-lg mb-4">{item.name}</p>
-                               <div className="flex gap-2">
-                                  <button onClick={() => { addToCart(item); removeFromWishlist(item.id); }} className="text-[10px] font-black uppercase text-brand-primary tracking-[0.2em] bg-brand-primary/5 px-3 py-1 rounded-full">To Cart</button>
-                                  <button onClick={() => removeFromWishlist(item.id)} className="text-[10px] font-black uppercase text-slate-400 tracking-[0.2em] bg-slate-50 px-3 py-1 rounded-full">Remove</button>
-                               </div>
-                            </div>
-                         </div>
-                      ))}
-                   </div>
-                ) : <div className="text-center pt-20"><p className="font-serif text-slate-300 text-2xl italic">No specimens saved yet.</p></div>
-             )}
-          </div>
-
-          {/* Fixed Footer for Cart Sidebar */}
-          {sidebarTab === 'cart' && cartItems.length > 0 && (
-             <div className="p-8 space-y-6 bg-white shrink-0">
-                <div className="flex justify-between font-serif text-xl border-t border-slate-100 pt-8">
-                   <span>Total</span>
-                   <span className="text-brand-primary font-bold">${cartItems.reduce((acc, item) => acc + parseInt(item.price.replace('$', '')) * item.quantity, 0).toFixed(2)}</span>
-                </div>
-                <div className="space-y-3">
-                   <Link 
-                      to="/checkout"
-                      onClick={closeSidebar}
-                      className="w-full bg-brand-primary text-white py-5 rounded-2xl font-black uppercase text-[10px] tracking-[0.3em] hover:bg-brand-accent transition-all shadow-2xl flex items-center justify-center text-center"
-                   >
-                      Proceed to Checkout
-                   </Link>
-                   <Link 
-                      to="/cart"
-                      onClick={closeSidebar}
-                      className="w-full py-2 text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 hover:text-brand-primary transition-colors text-center block"
-                   >
-                      View carts
-                   </Link>
-                </div>
-             </div>
-          )}
-        </div>
-      </div>
-
+      <CartSidebar />
       <Footer />
     </div>
   );
